@@ -10,6 +10,7 @@ FROM layoffs;
 -- Step3 : Null Values or Blank values 
 -- Step4 : Remove unnecesary columns or rows 
 
+<<<<<<< HEAD
  # You're creating a blank table with the same structure as layoffs, then filling it with all the data from layoffs (duplicate)
  
 CREATE TABLE layoffs_staging 
@@ -36,10 +37,33 @@ FROM layoffs_staging;
   -- CHECKING FOR DUPLICATES IN ALL COLUMNS 
   
 WITH duplicate_cte AS # This creates a CTE named duplicate_cte for the duplicates 
+=======
+ # Creating a table we can work with instead of the main table 
+ 
+CREATE TABLE layoffs_staging 
+LIKE layoffs;
+
+
+
+
+INSERT layoffs_staging
+SELECT *
+FROM layoffs;
+
+
+SELECT *,
+ROW_NUMBER() OVER(
+PARTITION BY company ,location, stage, country, funds_raised_millions, industry , total_laid_off , percentage_laid_off , `date`) AS row_num
+FROM layoffs_staging;
+ 
+ # CHECKING FOR DUPLICATES IN ALL COLUMNS 
+WITH duplicate_cte AS 
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 (
 SELECT *,
 ROW_NUMBER() OVER(
 PARTITION BY company ,location, 
+<<<<<<< HEAD
 stage, country, funds_raised_millions,                        # Copied code that brought out the row numbers earlier 
 industry , total_laid_off , percentage_laid_off , `date`) AS row_num
 FROM layoffs_staging
@@ -68,6 +92,24 @@ WHERE company = 'Casper'; # checking Casper company name to be sure it is just 2
 
     
 CREATE TABLE `layoffs_staging4` (    # change the name because its a diferent table 
+=======
+stage, country, funds_raised_millions, 
+industry , total_laid_off , percentage_laid_off , `date`) AS row_num
+FROM layoffs_staging
+) 
+
+SELECT *
+FROM duplicate_cte
+WHERE row_num > 1;
+
+SELECT * 
+FROM layoffs_staging
+WHERE company = 'Casper';
+
+
+# Creating a new layoffs table to delete the duplicates
+CREATE TABLE `layoffs_staging4` (    # change the name 
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
   `company` text,
   `location` text,
   `industry` text,
@@ -77,6 +119,7 @@ CREATE TABLE `layoffs_staging4` (    # change the name because its a diferent ta
   `stage` text,
   `country` text,
   `funds_raised_millions` int DEFAULT NULL,
+<<<<<<< HEAD
   `row_num` INT                                   # add this for the row number column 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
  
@@ -98,6 +141,22 @@ ROW_NUMBER() OVER(
 PARTITION BY company ,location, 
 stage, country, funds_raised_millions, 
 industry , total_laid_off , percentage_laid_off , `date`) AS row_num   # the contents of row number
+=======
+  `row_num` INT  # add this 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+SELECT * 
+FROM layoffs_staging4   # inserts just the columns 
+WHERE row_num > 1;
+
+INSERT INTO layoffs_staging4  # inserts the contents of the columns 
+SELECT *,
+ROW_NUMBER() OVER(
+PARTITION BY company ,location, 
+stage, country, funds_raised_millions, 
+industry , total_laid_off , percentage_laid_off , `date`) AS row_num
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 FROM layoffs_staging;
 
 SET SQL_SAFE_UPDATES = 0;  # Allows delete function to work
@@ -110,6 +169,7 @@ SELECT*    # to check if the duplicates are deleted
 FROM layoffs_staging4
 WHERE row_num > 1;
 
+<<<<<<< HEAD
 # And conclusion nothing would show ....duplicates have been removed 
  
  
@@ -121,20 +181,33 @@ WHERE row_num > 1;
  
  
  -- STANDARDIZING DATA 
+=======
+ 
+ # STANDARDIZING DATA 
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
  
  SET SQL_SAFE_UPDATES = 0;
  
  -- Trimming company column
  
+<<<<<<< HEAD
 SELECT company , (TRIM(company))   # Showing the initial look and the TRIM version of company column   
 FROM layoffs_staging4;
  
 UPDATE layoffs_staging4
 SET company =  TRIM(company);    # UPDATE is to update and SET the company column to a TRIM version 
+=======
+SELECT company , (TRIM(company))     # DISTINCT list all without repeating anyone in that specific column
+FROM layoffs_staging4;
+ 
+UPDATE layoffs_staging4
+SET company =  TRIM(company);
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 
  -- changing name of things in industry column  
  
+<<<<<<< HEAD
  SELECT DISTINCT industry    # DISTINCT -- list all without repeating anyone in that specific column
 FROM layoffs_staging4;      # we are using this to check if any industry was misspelt or the same name was repeated twice but with a suffix or an unecessary letter  
 
@@ -150,17 +223,41 @@ WHERE industry LIKE 'Crypto%';  # This renamed everything that looked like 'cryp
 SELECT DISTINCT country
 FROM layoffs_staging4
 ORDER BY 1;   # sort in alphabetical order based on the 1st column after the SELECT query 
+=======
+ SELECT DISTINCT industry 
+FROM layoffs_staging4
+ ;
+
+UPDATE layoffs_staging4
+SET industry = 'Crypto' 
+WHERE industry LIKE 'Crypto%';  # This renamed everything that looked like 'crypto%' int just 'crypto'
+
+
+
+SELECT DISTINCT country
+FROM layoffs_staging4
+ORDER BY 1; 
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 
 
 SELECT *
+<<<<<<< HEAD
 FROM layoffs_staging4    
 WHERE country LIKE 'United States%'     # After showing all the United States% it was shown that there was an issue similar to Crypto industry 
+=======
+FROM layoffs_staging4
+WHERE country LIKE 'United States%'
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 ORDER BY 1; 
 
 UPDATE layoffs_staging4
 SET country = 'United States' 
+<<<<<<< HEAD
 WHERE country LIKE 'United states%';  # did the same for united states ....  Renamed all to United States
+=======
+WHERE country LIKE 'United states%';  # did the same for united states 
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 -- changing date to time/date instead of text 
 
@@ -174,6 +271,7 @@ FROM  layoffs_staging4;
 UPDATE layoffs_staging4
 SET `date` = STR_TO_DATE(`date`, '%m/%d/%Y');
 
+<<<<<<< HEAD
 ALTER TABLE layoffs_staging4  # ALTER used to change the structure of the table....Alters the table
 MODIFY COLUMN `date` DATE;    # changes the column datatype to a proper DATE type instead of text.
 
@@ -194,17 +292,37 @@ SELECT *
 FROM layoffs_staging4
 WHERE total_laid_off IS NULL      # WHERE applies a condition to filter the rows with the ones with nulls ...
 AND percentage_laid_off IS NULL;  # ....on both the total_laid_off and percentage_laid_off
+=======
+ALTER TABLE layoffs_staging4
+MODIFY COLUMN `date` DATE;
+
+SELECT * 
+FROM layoffs_staging4;
+
+-- REMOVING BLANKS & NULLS alter
+
+SELECT * 
+FROM layoffs_staging4
+WHERE total_laid_off IS NULL
+AND percentage_laid_off IS NULL;
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 -- changing blanks to nulls
 
 UPDATE layoffs_staging4
+<<<<<<< HEAD
 SET industry = NULL  # Changing all blanks to nulls to easily be able to edit them since they are the same thing 
 WHERE industry = '';   
+=======
+SET industry = NULL
+WHERE industry = '';
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 
 
 SELECT *
 FROM layoffs_staging4
+<<<<<<< HEAD
 WHERE industry IS NULL    # calling out all the nulls and blanks ( there shouldn't be any blanks because we have changed them to nulls)
 OR industry = '' ; 
 
@@ -241,17 +359,55 @@ AND T2.industry IS NOT NULL;        # Summary of this we made T1 industry ( the 
 SELECT * 
 FROM layoffs_staging4         
 WHERE company LIKE 'Bally%' ;  # just checking if there were any issues 
+=======
+WHERE industry IS NULL 
+OR industry = '' ; 
+
+ -- updating Airbnb industry column so they can all have the same 'Travel'
+SELECT * 
+FROM layoffs_staging4
+WHERE company = 'Airbnb' ;
+
+SELECT T1.industry , T2.industry
+FROM layoffs_staging4 T1
+JOIN layoffs_staging4 T2
+  ON T1.company = T2.company 
+  AND T1.location = T2.location
+  WHERE (T1.industry IS NULL OR T1.industry = '')  # Show us rows that have industry t1 as null or industry t1 as blank 
+AND T2.industry IS NOT NULL;  # Show us rows that have no nulls in industry t2
+
+
+UPDATE layoffs_staging4 T1
+JOIN layoffs_staging4 T2
+  ON T1.company = T2.company 
+  SET T1.industry = T2.industry
+    WHERE (T1.industry IS NULL )  
+AND T2.industry IS NOT NULL; 
+
+
+SELECT * 
+FROM layoffs_staging4
+WHERE company LIKE 'Bally%' ;
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
   
   
   SELECT * 
 FROM layoffs_staging4
 WHERE total_laid_off IS NULL
+<<<<<<< HEAD
 AND percentage_laid_off IS NULL;    # Selecting the NULLS in percentage_laid_off AND total_laid_off at the same time ...
+=======
+AND percentage_laid_off IS NULL;
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 DELETE 
 FROM layoffs_staging4
 WHERE total_laid_off IS NULL
+<<<<<<< HEAD
 AND percentage_laid_off IS NULL;  # This is for removing those NULL values because they are useless since those are the key columns in the whole data 
+=======
+AND percentage_laid_off IS NULL;  # This is for removing specific null values 
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
 
 SELECT * 
 FROM layoffs_staging4;
@@ -259,4 +415,8 @@ FROM layoffs_staging4;
 -- to remove columns 
 
 ALTER TABLE layoffs_staging4
+<<<<<<< HEAD
 DROP COLUMN row_num;       # We are done with row number column so we are dropping it 
+=======
+DROP COLUMN row_num;
+>>>>>>> c8c86b13f5f8dbafbcc4820b18b23a4898f1e56c
